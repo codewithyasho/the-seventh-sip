@@ -35,6 +35,11 @@ body {
   overflow-x: hidden;
 }
 
+#dropSpotContainer,
+.locationAccess {
+  display: none;
+}
+
 body.has-floating-cart {
   padding-bottom: 6.4rem;
 }

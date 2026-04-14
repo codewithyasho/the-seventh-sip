@@ -393,21 +393,23 @@
                         <label for="studentName">Full Name</label>
                         <input id="studentName" name="studentName" type="text" placeholder="Enter your name" required />
 
-                        <label for="collegeName">College / Campus</label>
-                        <select id="collegeName" name="dropSpot" required>
+                        <label for="collegeName">College / Individual</label>
+                        <select id="collegeName" name="collegeName" required>
                             <option value="">Select pickup point</option>
                             <option>DY Patil International University, Akurdi</option>
                             <option>PCET / PCCOE, Akurdi</option>
+                            <option>Individual</option>
                         </select>
 
-                        <label for="dropSpot">Drop Spot</label>
-                        <select id="dropSpot" name="dropSpot" required>
-                            <option value="">Select pickup point</option>
-                            <option>Main Gate</option>
+                        <div id="dropSpotContainer">
+                            <label for="dropSpot">Drop Spot</label>
+                            <select id="dropSpot" name="dropSpot">
+                              <option value="">Select pickup point</option>
+                              <option>Main Gate</option>
+                            </select>
+                          </div>
 
-                        </select>
-
-                        <div class="location-access-box" aria-label="Location access">
+                        <div class="location-access-box locationAccess" aria-label="Location access">
                             <label for="locationAddress">Current Location (Optional)</label>
                             <div class="location-actions">
                                 <button id="detectLocationBtn" class="btn btn-ghost location-action-btn"

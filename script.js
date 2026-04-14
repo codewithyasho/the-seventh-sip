@@ -58,6 +58,36 @@ const isPeriPeriFries = (name) => {
   return normalizedName === "peri peri fries" || normalizedName === "perri perri fries";
 };
 
+document.addEventListener("DOMContentLoaded", () => {
+  const collegeSelect = document.getElementById("collegeName");
+  const dropSpotContainer = document.getElementById("dropSpotContainer");
+  const locationBox = document.querySelector(".location-access-box");
+
+  const handleCollegeChange = () => {
+    const selected = collegeSelect.value;
+
+    if (
+      selected === "DY Patil International University, Akurdi" ||
+      selected === "PCET / PCCOE, Akurdi"
+    ) {
+      dropSpotContainer.classList.remove("hidden");
+      locationBox.classList.add("hidden");
+    } else if (selected === "Individual") {
+      dropSpotContainer.classList.add("hidden");
+      locationBox.classList.remove("hidden");
+    } else {
+      // 🔥 THIS handles initial state
+      dropSpotContainer.classList.add("hidden");
+      locationBox.classList.add("hidden");
+    }
+  };
+
+  collegeSelect.addEventListener("change", handleCollegeChange);
+
+  // ✅ THIS LINE WAS MISSING
+  handleCollegeChange();
+});
+
 const setVisibleAddOns = (allowedAddOnIds) => {
   if (!addOnForm) {
     return false;
@@ -574,6 +604,40 @@ const initializeLocationAccess = () => {
     setLocationStatus("Manual location saved.", "success");
   });
 };
+document.addEventListener("DOMContentLoaded", () => {
+  const collegeSelect = document.getElementById("collegeName");
+  const dropSpotContainer = document.getElementById("dropSpotContainer");
+  const locationBox = document.querySelector(".location-access-box");
+
+  if (!collegeSelect || !dropSpot || !locationBox) return;
+
+  const handleCollegeChange = () => {
+    const selected = collegeSelect.value;
+
+    if (
+      selected === "DY Patil International University, Akurdi" ||
+      selected === "PCET / PCCOE, Akurdi"
+    ) {
+      // Show Drop Spot
+      dropSpotContainer.style.display = "block";
+
+      // Hide Location
+      locationBox.style.display = "none";
+    } else if (selected === "Individual") {
+      // Hide Drop Spot
+      dropSpotContainer.style.display = "none";
+
+      // Show Location
+      locationBox.style.display = "block";
+    } else {
+      // Hide both initially
+      dropSpotContainer.style.display = "none";
+      locationBox.style.display = "none";
+    }
+  };
+
+  collegeSelect.addEventListener("change", handleCollegeChange);
+});
 
 const bindOrderSubmit = () => {
   orderForm.addEventListener("submit", (event) => {
@@ -591,31 +655,42 @@ const bindOrderSubmit = () => {
     const dropSpot = document.getElementById("dropSpot").value.trim();
     const phoneNumber = document.getElementById("phoneNumber").value.trim();
     const orderNote = document.getElementById("orderNote").value.trim();
+    const locationBox = document.querySelector(".location-access-box");
     const locationAddress = locationAddressEl ? locationAddressEl.value.trim() : "";
     const locationCoords = locationCoordsEl ? locationCoordsEl.value.trim() : "";
     const mapsPin = locationCoords
       ? `https://maps.google.com/?q=${encodeURIComponent(locationCoords)}`
       : "";
 
-    const messageLines = [
-      "Coffee Seventh Sip - Campus Order",
-      "",
-      `Name: ${studentName}`,
-      `College: ${collegeName}`,
-      `Drop Spot: ${dropSpot}`,
-      `Location: ${locationAddress || "Not shared"}`,
-      `GPS Pin: ${mapsPin || "Not shared"}`,
-      `Phone: ${phoneNumber}`,
-      "",
-      "Items:",
-      ...buildOrderLines(),
-      "",
-      `Subtotal: ${inr(subtotal)}`,
-      `Campus Service: ${inr(service)}`,
-      `Total: ${inr(total)}`,
-      orderNote ? `Notes: ${orderNote}` : "Notes: None",
-      `Order Time: ${new Date().toLocaleString()}`,
-    ];
+      const messageLines = [
+        "Coffee Seventh Sip - Campus Order",
+        "",
+        `Name: ${studentName}`,
+        `College: ${collegeName}`,
+      ];
+      
+      // Conditional logic 👇
+      if (collegeName === "Individual") {
+        messageLines.push(
+          `Location: ${locationAddress || "Not shared"}`,
+          `GPS Pin: ${mapsPin || "Not shared"}`
+        );
+      } else {
+        messageLines.push(`Drop Spot: ${dropSpot}`);
+      }
+      
+      messageLines.push(
+        `Phone: ${phoneNumber}`,
+        "",
+        "Items:",
+        ...buildOrderLines(),
+        "",
+        `Subtotal: ${inr(subtotal)}`,
+        `Campus Service: ${inr(service)}`,
+        `Total: ${inr(total)}`,
+        orderNote ? `Notes: ${orderNote}` : "Notes: None",
+        `Order Time: ${new Date().toLocaleString()}`
+      );
 
     const finalMessage = messageLines.join("\n");
 
