@@ -1,6 +1,8 @@
 const cart = new Map();
 const SERVICE_FEE = 7;
 const WHATSAPP_NUMBER = "+917276739369"; // Replace with your WhatsApp number in international format without '+' or dashes
+const RAZORPAY_KEY_ID = "rzp_live_Sdn3VNQ0jTNVFk"; // Paste your Razorpay key_id here (never key_secret)
+const RAZORPAY_CURRENCY = "INR";
 const ADD_ONS = [
   { id: "chocolate-crush", name: "Chocolate Crush", price: 5 },
   { id: "extra-cheese", name: "Extra Cheese", price: 10 },
@@ -57,36 +59,6 @@ const isPeriPeriFries = (name) => {
   const normalizedName = normalizeMenuItemName(name);
   return normalizedName === "peri peri fries" || normalizedName === "perri perri fries";
 };
-
-document.addEventListener("DOMContentLoaded", () => {
-  const collegeSelect = document.getElementById("collegeName");
-  const dropSpotContainer = document.getElementById("dropSpotContainer");
-  const locationBox = document.querySelector(".location-access-box");
-
-  const handleCollegeChange = () => {
-    const selected = collegeSelect.value;
-
-    if (
-      selected === "DY Patil International University, Akurdi" ||
-      selected === "PCET / PCCOE, Akurdi"
-    ) {
-      dropSpotContainer.classList.remove("hidden");
-      locationBox.classList.add("hidden");
-    } else if (selected === "Individual") {
-      dropSpotContainer.classList.add("hidden");
-      locationBox.classList.remove("hidden");
-    } else {
-      // 🔥 THIS handles initial state
-      dropSpotContainer.classList.add("hidden");
-      locationBox.classList.add("hidden");
-    }
-  };
-
-  collegeSelect.addEventListener("change", handleCollegeChange);
-
-  // ✅ THIS LINE WAS MISSING
-  handleCollegeChange();
-});
 
 const setVisibleAddOns = (allowedAddOnIds) => {
   if (!addOnForm) {
@@ -159,6 +131,128 @@ const buildOrderLines = () => {
 const syncHiddenOrderSummary = () => {
   const lines = buildOrderLines();
   orderSummaryInput.value = lines.join(" | ");
+};
+
+const buildOrderMessage = ({
+  studentName,
+  collegeName,
+  dropSpot,
+  phoneNumber,
+  orderNote,
+  locationAddress,
+  mapsPin,
+  subtotal,
+  service,
+  total,
+  paymentMode,
+  paymentStatus,
+  razorpayPaymentId = "",
+}) => {
+  const messageLines = [
+    "Coffee Seventh Sip - Campus Order",
+    "",
+    `Name: ${studentName}`,
+    `College: ${collegeName}`,
+  ];
+
+  if (collegeName === "Individual") {
+    messageLines.push(
+      `Location: ${locationAddress || "Not shared"}`,
+      `GPS Pin: ${mapsPin || "Not shared"}`
+    );
+  } else {
+    messageLines.push(`Drop Spot: ${dropSpot || "Not selected"}`);
+  }
+
+  messageLines.push(
+    `Phone: ${phoneNumber}`,
+    `Payment Mode: ${paymentMode}`,
+    `Payment Status: ${paymentStatus}`
+  );
+
+  if (razorpayPaymentId) {
+    messageLines.push(`Razorpay Payment ID: ${razorpayPaymentId}`);
+  }
+
+  messageLines.push(
+    "",
+    "Items:",
+    ...buildOrderLines(),
+    "",
+    `Subtotal: ${inr(subtotal)}`,
+    `Campus Service: ${inr(service)}`,
+    `Total: ${inr(total)}`,
+    orderNote ? `Notes: ${orderNote}` : "Notes: None",
+    `Order Time: ${new Date().toLocaleString()}`
+  );
+
+  return messageLines.join("\n");
+};
+
+const showOrderDraft = (finalMessage) => {
+  orderPreview.textContent = finalMessage;
+  whatsappLink.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(finalMessage)}`;
+  openModal();
+};
+
+const openRazorpayCheckout = (orderDetails) => {
+  if (!window.Razorpay) {
+    window.alert("Razorpay SDK did not load. Refresh the page and try again.");
+    return;
+  }
+
+  if (!RAZORPAY_KEY_ID || RAZORPAY_KEY_ID === "YOUR_KEY_ID") {
+    window.alert("Add your Razorpay key_id in script.js before accepting online payments.");
+    return;
+  }
+
+  const options = {
+    key: RAZORPAY_KEY_ID,
+    amount: String(Math.round(orderDetails.total * 100)),
+    currency: RAZORPAY_CURRENCY,
+    name: "The Seventh Sip",
+    description: "Campus Order Payment",
+    image: "images/light_logo2.png",
+    handler(response) {
+      const finalMessage = buildOrderMessage({
+        ...orderDetails,
+        paymentStatus: "Paid via Razorpay",
+        razorpayPaymentId: response.razorpay_payment_id || "",
+      });
+
+      showOrderDraft(finalMessage);
+    },
+    prefill: {
+      name: orderDetails.studentName,
+      contact: orderDetails.phoneNumber,
+    },
+    notes: {
+      college: orderDetails.collegeName,
+      dropSpot: orderDetails.dropSpot || "NA",
+      location: orderDetails.locationAddress || "NA",
+    },
+    theme: {
+      color: "#9a6236",
+    },
+    modal: {
+      ondismiss() {
+        window.alert("Payment popup closed. Your order is not marked as paid yet.");
+      },
+    },
+  };
+
+  const razorpayInstance = new window.Razorpay(options);
+
+  razorpayInstance.on("payment.failed", (response) => {
+    const errorMessage =
+      response && response.error && response.error.description
+        ? response.error.description
+        : "Payment failed. Please try again or select Cash on Delivery.";
+
+    window.alert(errorMessage);
+  });
+
+  razorpayInstance.open();
 };
 
 const addToCart = (name, basePrice, addOns = []) => {
@@ -609,7 +703,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const dropSpotContainer = document.getElementById("dropSpotContainer");
   const locationBox = document.querySelector(".location-access-box");
 
-  if (!collegeSelect || !dropSpot || !locationBox) return;
+  if (!collegeSelect || !dropSpotContainer || !locationBox) {
+    return;
+  }
 
   const handleCollegeChange = () => {
     const selected = collegeSelect.value;
@@ -637,9 +733,14 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   collegeSelect.addEventListener("change", handleCollegeChange);
+  handleCollegeChange();
 });
 
 const bindOrderSubmit = () => {
+  if (!orderForm) {
+    return;
+  }
+
   orderForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
@@ -655,49 +756,44 @@ const bindOrderSubmit = () => {
     const dropSpot = document.getElementById("dropSpot").value.trim();
     const phoneNumber = document.getElementById("phoneNumber").value.trim();
     const orderNote = document.getElementById("orderNote").value.trim();
-    const locationBox = document.querySelector(".location-access-box");
+    const paymentModeInput = document.querySelector('input[name="paymentMode"]:checked');
+    const paymentMode = paymentModeInput ? paymentModeInput.value : "Cash on Delivery";
     const locationAddress = locationAddressEl ? locationAddressEl.value.trim() : "";
     const locationCoords = locationCoordsEl ? locationCoordsEl.value.trim() : "";
     const mapsPin = locationCoords
       ? `https://maps.google.com/?q=${encodeURIComponent(locationCoords)}`
       : "";
 
-      const messageLines = [
-        "Coffee Seventh Sip - Campus Order",
-        "",
-        `Name: ${studentName}`,
-        `College: ${collegeName}`,
-      ];
-      
-      // Conditional logic 👇
-      if (collegeName === "Individual") {
-        messageLines.push(
-          `Location: ${locationAddress || "Not shared"}`,
-          `GPS Pin: ${mapsPin || "Not shared"}`
-        );
-      } else {
-        messageLines.push(`Drop Spot: ${dropSpot}`);
-      }
-      
-      messageLines.push(
-        `Phone: ${phoneNumber}`,
-        "",
-        "Items:",
-        ...buildOrderLines(),
-        "",
-        `Subtotal: ${inr(subtotal)}`,
-        `Campus Service: ${inr(service)}`,
-        `Total: ${inr(total)}`,
-        orderNote ? `Notes: ${orderNote}` : "Notes: None",
-        `Order Time: ${new Date().toLocaleString()}`
-      );
+    if (collegeName !== "Individual" && !dropSpot) {
+      window.alert("Please select your drop spot before placing the order.");
+      return;
+    }
 
-    const finalMessage = messageLines.join("\n");
+    const orderDetails = {
+      studentName,
+      collegeName,
+      dropSpot,
+      phoneNumber,
+      orderNote,
+      locationAddress,
+      mapsPin,
+      subtotal,
+      service,
+      total,
+      paymentMode,
+    };
 
-    orderPreview.textContent = finalMessage;
-    whatsappLink.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(finalMessage)}`;
+    if (paymentMode === "Online Payment") {
+      openRazorpayCheckout(orderDetails);
+      return;
+    }
 
-    openModal();
+    const finalMessage = buildOrderMessage({
+      ...orderDetails,
+      paymentStatus: "Pay on Delivery",
+    });
+
+    showOrderDraft(finalMessage);
   });
 };
 
