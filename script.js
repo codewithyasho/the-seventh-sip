@@ -149,7 +149,7 @@ const buildOrderMessage = ({
   razorpayPaymentId = "",
 }) => {
   const messageLines = [
-    "Coffee Seventh Sip - Campus Order",
+    "The Seventh Sip - Order",
     "",
     `Name: ${studentName}`,
     `College: ${collegeName}`,
