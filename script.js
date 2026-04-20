@@ -155,7 +155,7 @@ const buildOrderMessage = ({
     `College: ${collegeName}`,
   ];
 
-  if (collegeName === "Individual") {
+  if (collegeName === "Custom Location") {
     messageLines.push(
       `Location: ${locationAddress || "Not shared"}`,
       `GPS Pin: ${mapsPin || "Not shared"}`
@@ -719,7 +719,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Hide Location
       locationBox.style.display = "none";
-    } else if (selected === "Individual") {
+    } else if (selected === "Custom Location") {
       // Hide Drop Spot
       dropSpotContainer.style.display = "none";
 
@@ -764,7 +764,7 @@ const bindOrderSubmit = () => {
       ? `https://maps.google.com/?q=${encodeURIComponent(locationCoords)}`
       : "";
 
-    if (collegeName !== "Individual" && !dropSpot) {
+    if (collegeName !== "Custom Location" && !dropSpot) {
       window.alert("Please select your drop spot before placing the order.");
       return;
     }
