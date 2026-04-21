@@ -411,7 +411,7 @@
                         </div>
 
                         <div class="location-access-box locationAccess" aria-label="Location access">
-                            <label for="locationAddress">Current Location (Optional)</label>
+                            <label for="locationAddress">Current Location</label>
                             <div class="location-actions">
                                 <button id="detectLocationBtn" class="btn btn-ghost location-action-btn"
                                     type="button">Use
@@ -423,8 +423,8 @@
                                 can
                                 allow access or type manually.</p>
                             <input id="locationAddress" name="locationAddress" type="text"
-                                placeholder="Hostel, landmark, block, or nearest gate" autocomplete="street-address" />
-                            <input id="locationCoords" name="locationCoords" type="hidden" />
+                                placeholder="Hostel, landmark, block, or nearest gate" autocomplete="street-address" required/>
+                            <input id="locationCoords" name="locationCoords" type="hidden" required/>
                         </div>
 
                         <label for="phoneNumber">Phone Number</label>
