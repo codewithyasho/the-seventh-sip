@@ -1,5 +1,4 @@
 const cart = new Map();
-const SERVICE_FEE = 7;
 const WHATSAPP_NUMBER = "+917276739369"; // Replace with your WhatsApp number in international format without '+' or dashes
 const RAZORPAY_KEY_ID = "rzp_live_Sdn3VNQ0jTNVFk"; // Paste your Razorpay key_id here (never key_secret)
 const RAZORPAY_CURRENCY = "INR";
@@ -18,7 +17,6 @@ const addOnLookup = new Map(ADD_ONS.map((addOn) => [addOn.id, addOn]));
 
 const cartItemsEl = document.getElementById("cartItems");
 const subtotalEl = document.getElementById("subtotal");
-const serviceFeeEl = document.getElementById("serviceFee");
 const grandTotalEl = document.getElementById("grandTotal");
 const orderForm = document.getElementById("orderForm");
 const orderSummaryInput = document.getElementById("orderSummary");
@@ -105,10 +103,9 @@ const getTotals = () => {
     subtotal += item.price * item.qty;
   }
 
-  const service = subtotal > 0 ? SERVICE_FEE : 0;
-  const total = subtotal + service;
+  const total = subtotal;
 
-  return { subtotal, service, total };
+  return { subtotal, total };
 };
 
 const getTotalItemCount = () => {
@@ -145,7 +142,6 @@ const buildOrderMessage = ({
   locationAddress,
   mapsPin,
   subtotal,
-  service,
   total,
   paymentMode,
   paymentStatus,
@@ -183,7 +179,6 @@ const buildOrderMessage = ({
     ...buildOrderLines(),
     "",
     `Subtotal: ${inr(subtotal)}`,
-    `Campus Service: ${inr(service)}`,
     `Total: ${inr(total)}`,
     orderNote ? `Notes: ${orderNote}` : "Notes: None",
     `Order Time: ${new Date().toLocaleString()}`
@@ -355,7 +350,7 @@ const updateFloatingCartBar = (total) => {
 };
 
 const renderCart = () => {
-  const { subtotal, service, total } = getTotals();
+  const { subtotal, total } = getTotals();
 
   if (cart.size === 0) {
     cartItemsEl.innerHTML = '<li class="cart-empty">No cups yet. Tap Add + in the menu to start.</li>';
@@ -382,7 +377,6 @@ const renderCart = () => {
   }
 
   subtotalEl.textContent = inr(subtotal);
-  serviceFeeEl.textContent = inr(service);
   grandTotalEl.textContent = inr(total);
   updateFloatingCartBar(total);
 
@@ -752,7 +746,7 @@ const bindOrderSubmit = () => {
       return;
     }
 
-    const { subtotal, service, total } = getTotals();
+    const { subtotal, total } = getTotals();
 
     const studentName = document.getElementById("studentName").value.trim();
     const collegeName = document.getElementById("collegeName").value.trim();
@@ -781,7 +775,6 @@ const bindOrderSubmit = () => {
       locationAddress,
       mapsPin,
       subtotal,
-      service,
       total,
       paymentMode,
     };
