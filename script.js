@@ -32,6 +32,9 @@ const addOnForm = document.getElementById("addonForm");
 const addOnDrinkNameEl = document.getElementById("addonDrinkName");
 const skipAddOnBtn = document.getElementById("skipAddOnBtn");
 const closeAddOnBtn = document.getElementById("closeAddOnBtn");
+const timingModal = document.getElementById("timingModal");
+const confirmTimingModalBtn = document.getElementById("confirmTimingModalBtn");
+const closeTimingModalBtn = document.getElementById("closeTimingModalBtn");
 const floatingCartBar = document.getElementById("floatingCartBar");
 const floatingCartCountEl = document.getElementById("floatingCartCount");
 const floatingCartTotalEl = document.getElementById("floatingCartTotal");
@@ -860,12 +863,48 @@ const setFooterYear = () => {
   }
 };
 
+const openTimingModal = () => {
+  if (!timingModal) {
+    return;
+  }
+
+  timingModal.classList.add("show");
+  timingModal.setAttribute("aria-hidden", "false");
+};
+
+const closeTimingModal = () => {
+  if (!timingModal) {
+    return;
+  }
+
+  timingModal.classList.remove("show");
+  timingModal.setAttribute("aria-hidden", "true");
+};
+
+const bindTimingModal = () => {
+  if (!timingModal || !confirmTimingModalBtn || !closeTimingModalBtn) {
+    return;
+  }
+
+  openTimingModal();
+
+  confirmTimingModalBtn.addEventListener("click", closeTimingModal);
+  closeTimingModalBtn.addEventListener("click", closeTimingModal);
+
+  timingModal.addEventListener("click", (event) => {
+    if (event.target === timingModal) {
+      closeTimingModal();
+    }
+  });
+};
+
 bindMenuButtons();
 bindAddOnModal();
 bindCartControls();
 initializeLocationAccess();
 bindOrderSubmit();
 bindModalControls();
+bindTimingModal();
 setupRevealAnimation();
 setFooterYear();
 renderCart();

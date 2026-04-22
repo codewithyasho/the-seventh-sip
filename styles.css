@@ -1053,6 +1053,36 @@ p {
   flex-wrap: wrap;
 }
 
+.timing-modal-content {
+  width: min(460px, 100%);
+  position: relative;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.timing-close-btn {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(198, 148, 103, 0.45);
+  background: rgba(20, 11, 8, 0.82);
+  color: var(--text-main);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.timing-close-btn:hover {
+  border-color: rgba(231, 185, 138, 0.72);
+}
+
+.timing-modal-content .modal-actions {
+  margin-top: 0.35rem;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(28px) scale(0.98);
